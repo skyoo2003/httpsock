@@ -1,5 +1,6 @@
 package httpsock.impl;
 
+import com.google.common.base.MoreObjects;
 import httpsock.HttpConstants;
 import httpsock.HttpResponse;
 
@@ -45,6 +46,7 @@ public class HttpResponseImpl implements HttpResponse {
         return version;
     }
 
+    @Override
     public void setVersion(String version) {
         this.version = version;
     }
@@ -54,6 +56,7 @@ public class HttpResponseImpl implements HttpResponse {
         return statusCode;
     }
 
+    @Override
     public void setStatusCode(Integer statusCode) {
         this.statusCode = statusCode;
     }
@@ -63,17 +66,37 @@ public class HttpResponseImpl implements HttpResponse {
         return statusReason;
     }
 
+    @Override
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
     }
 
     @Override
     public Map<String, String> getHeaders() {
+        if (headers == null) {
+            headers = new HashMap<String, String>();
+        }
         return headers;
     }
 
+    @Override
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
+    }
+
+    @Override
+    public void putHeader(String key, String value) {
+        getHeaders().put(key, value);
+    }
+
+    @Override
+    public String getHeader(String key) {
+        return getHeader(key, "");
+    }
+
+    @Override
+    public String getHeader(String key, String def) {
+        return MoreObjects.firstNonNull(getHeaders().get(key), def);
     }
 
     @Override
@@ -81,6 +104,7 @@ public class HttpResponseImpl implements HttpResponse {
         return content;
     }
 
+    @Override
     public void setContent(String content) {
         this.content = content;
     }
