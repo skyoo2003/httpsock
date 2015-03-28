@@ -36,17 +36,29 @@ public class HttpRequestImpl implements HttpRequest {
 
         if (requestParser.hasMoreTokens()) {
             String requestLine = requestParser.nextToken();
-            logger.info("[" + getClass().getSimpleName() + "]");
+            logger.info("[" + getClass().getSimpleName() + "] : requestLine\n{}", requestLine);
+
+            String[] columns = requestLine.split(" ");
+            if (columns == null || columns.length != 3) {
+                logger.error("[" + getClass().getSimpleName() + "] : requestLine is not valid");
+                return ;
+            }
+            setMethod(columns[0].trim().toUpperCase());
+            setUrl(columns[1].trim());
+            setVersion(columns[2].trim().toUpperCase());
         }
 
-        if (requestParser.hasMoreTokens()) {
-            //String headers
-        }
+        while (requestParser.hasMoreTokens()) {
+            String line = requestParser.nextToken();
+            logger.info("[" + getClass().getSimpleName() + "] : header or message body\n{}", line);
 
-        // Method Path Version
-        // Headers
-        // Data
-        // TODO
+            String[] columns = line.split(":");
+            if (columns != null && columns.length == 2) { // Parse the header
+                putHeader(columns[0].trim(), columns[1].trim());
+            } else { // Parse the message body
+                setBody(line.trim());
+            }
+        }
     }
 
     @Override
