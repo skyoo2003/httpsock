@@ -2,6 +2,8 @@ package httpsock;
 
 import httpsock.impl.HttpHandlerImpl;
 import httpsock.impl.HttpSessionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,7 +15,9 @@ import java.nio.channels.SocketChannel;
 /**
  * Created by lukas on 15. 3. 28..
  */
-public final class HttpServer implements Runnable {
+public final class HttpServer {
+
+    private final Logger logger = LoggerFactory.getLogger(HttpServer.class);
 
     private Selector selector;
     private ServerSocketChannel serverSocketChannel;
@@ -31,24 +35,31 @@ public final class HttpServer implements Runnable {
         }
     }
 
-    @Override
     public void run() {
         try {
             selector.selectNow();
             for (SelectionKey key : selector.selectedKeys()) {
                 if (key.isAcceptable()) {
                     SocketChannel clientChannel = serverSocketChannel.accept();
-                    clientChannel.configureBlocking(false);
-                    clientChannel.register(selector, SelectionKey.OP_READ);
+                    if (clientChannel != null) {
+                        clientChannel.configureBlocking(false);
+                        clientChannel.register(selector, SelectionKey.OP_READ);
+                    } else {
+                        logger.warn("[" + getClass().getSimpleName() + "] : clientChannel can not acceptable");
+                    }
                 } else if (key.isReadable()) {
                     SocketChannel clientChannel = (SocketChannel) key.channel();
-                    HttpSession httpSession = (HttpSession) key.attachment();
-                    if (httpSession == null) {
-                        httpSession = new HttpSessionImpl(clientChannel);
-                        key.attach(httpSession);
+                    if (clientChannel != null) {
+                        HttpSession httpSession = (HttpSession) key.attachment();
+                        if (httpSession == null) {
+                            httpSession = new HttpSessionImpl(clientChannel);
+                            key.attach(httpSession);
+                        }
+                        HttpHandler handler = new HttpHandlerImpl();
+                        handler.handle(httpSession);
+                    } else {
+                        logger.warn("[" + getClass().getSimpleName() + "] : clientChannel is not exist");
                     }
-                    HttpHandler handler = new HttpHandlerImpl();
-                    handler.handle(httpSession);
                 }
             }
         } catch (IOException ex) {
