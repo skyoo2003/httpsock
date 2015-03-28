@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Created by lukas on 15. 3. 15..
  */
-public class DefaultHttpResponse implements HttpResponse {
+public class HttpResponseImpl implements HttpResponse {
 
     protected String version;
     protected Integer statusCode;
@@ -17,7 +17,7 @@ public class DefaultHttpResponse implements HttpResponse {
     protected Map<String, String> headers;
     protected String content;
 
-    public DefaultHttpResponse() {
+    public HttpResponseImpl() {
         this.version = HttpConstants.HTTP_VERSION_1_1;
         this.statusCode = HttpConstants.OK_STATUS_CODE;
         this.statusReason = HttpConstants.OK_STATUS_REASON;
@@ -25,22 +25,15 @@ public class DefaultHttpResponse implements HttpResponse {
         this.content = "";
     }
 
-    public DefaultHttpResponse(Integer statusCode) {
+    public HttpResponseImpl(Integer statusCode) {
         this();
         if (statusCode != null) {
             this.statusCode = statusCode;
-            this.statusReason = HttpConstants.STATUS.get(statusCode);
+            this.statusReason = HttpConstants.getStatusReason(statusCode);
         }
     }
 
-    public DefaultHttpResponse(String content) {
-        this();
-        if (content != null) {
-            this.content = content;
-        }
-    }
-
-    public DefaultHttpResponse(Integer statusCode, String content) {
+    public HttpResponseImpl(Integer statusCode, String content) {
         this(statusCode);
         if (content != null) {
             this.content = content;
@@ -90,5 +83,16 @@ public class DefaultHttpResponse implements HttpResponse {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(getVersion()).append(" ").append(getStatusCode()).append(" ").append(getStatusReason()).append("\r\n");
+        for (Map.Entry<String, String> entry : getHeaders().entrySet()) {
+            buffer.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+        }
+        buffer.append("\r\n").append(getContent());
+        return buffer.toString().trim();
     }
 }

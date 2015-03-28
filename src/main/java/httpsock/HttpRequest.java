@@ -36,4 +36,10 @@ public interface HttpRequest {
      * @return
      */
     String getBody();
+
+    /**
+     * HTTP 표준에 따르는 요청 반환
+     * @return
+     */
+    String toString();
 }

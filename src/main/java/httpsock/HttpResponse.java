@@ -36,4 +36,10 @@ public interface HttpResponse {
      * @return
      */
     String getContent();
+
+    /**
+     * HTTP 표준에 따른 응답 반환
+     * @return
+     */
+    String toString();
 }

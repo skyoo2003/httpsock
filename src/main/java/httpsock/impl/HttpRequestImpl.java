@@ -9,14 +9,14 @@ import java.util.Map;
 /**
  * Created by lukas on 15. 3. 15..
  */
-public class DefaultHttpRequest implements HttpRequest {
+public class HttpRequestImpl implements HttpRequest {
     protected String method;
     protected String url;
     protected String version;
     protected Map<String, String> headers;
     protected String body;
 
-    public DefaultHttpRequest() {
+    public HttpRequestImpl() {
         this.method = HttpConstants.GET_METHOD;
         this.url = "";
         this.version = HttpConstants.HTTP_VERSION_1_1;
@@ -24,21 +24,9 @@ public class DefaultHttpRequest implements HttpRequest {
         this.body = "";
     }
 
-    public DefaultHttpRequest(String method, String url) {
+    public HttpRequestImpl(String rawRequest) {
         this();
-        if (method != null) {
-            this.method = method;
-        }
-        if (url != null) {
-            this.url = url;
-        }
-    }
 
-    public DefaultHttpRequest(String method, String url, String body) {
-        this(method, url);
-        if (body != null) {
-            this.body = body;
-        }
     }
 
     @Override
@@ -84,5 +72,16 @@ public class DefaultHttpRequest implements HttpRequest {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(getMethod()).append(" ").append(getUrl()).append(" ").append(getVersion()).append("\r\n");
+        for (Map.Entry<String, String> entry : getHeaders().entrySet()) {
+            buffer.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+        }
+        buffer.append("\r\n").append(getBody());
+        return buffer.toString().trim();
     }
 }

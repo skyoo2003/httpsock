@@ -10,8 +10,7 @@ public interface HttpHandler {
     /**
      * HTTP 요청 핸들링
      * @param session 세션 객체
-     * @param request 요청 객체
      * @return 처리 결과에 대한 응답 객체
      */
-    HttpResponse handle(HttpSession session, HttpRequest request);
+    HttpResponse handle(HttpSession session);
 }
