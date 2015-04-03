@@ -44,8 +44,6 @@ public final class HttpServer {
                     if (clientChannel != null) {
                         clientChannel.configureBlocking(false);
                         clientChannel.register(selector, SelectionKey.OP_READ);
-                    } else {
-                        logger.warn("[" + getClass().getSimpleName() + "] : clientChannel can not acceptable");
                     }
                 } else if (key.isReadable()) {
                     SocketChannel clientChannel = (SocketChannel) key.channel();
@@ -57,8 +55,6 @@ public final class HttpServer {
                         }
                         HttpHandler handler = new HttpHandlerImpl();
                         handler.handle(httpSession);
-                    } else {
-                        logger.warn("[" + getClass().getSimpleName() + "] : clientChannel is not exist");
                     }
                 }
             }
