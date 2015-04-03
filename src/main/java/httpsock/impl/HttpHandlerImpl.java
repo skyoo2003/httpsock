@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by lukas on 15. 3. 28..
@@ -18,9 +19,11 @@ public class HttpHandlerImpl implements HttpHandler {
 
     private final Logger logger = LoggerFactory.getLogger(HttpHandlerImpl.class);
 
+    public static final String ROOT_PATH = "www";
+
     @Override
     public HttpResponse handle(HttpSession session) {
-        HttpResponse response = null;
+        HttpResponse response = new HttpResponseImpl();
         try {
             Preconditions.checkNotNull(session, "session is null");
             HttpRequest request = session.recvRequest();
@@ -30,7 +33,6 @@ public class HttpHandlerImpl implements HttpHandler {
 
             response.getHeaders().put("Date", Calendar.getInstance().getTime().toString());
             response.getHeaders().put("Server", HttpConstants.SERVER_INFO);
-            response.getHeaders().put("Content-Length", String.valueOf(response.getContent().length()));
             response.getHeaders().put("Connection", "close");
 
             if (file.exists() && file.canRead()) {
@@ -42,30 +44,42 @@ public class HttpHandlerImpl implements HttpHandler {
                     internalBuffer.append(line);
                 }
 
-                response = new HttpResponseImpl(HttpConstants.OK_STATUS_CODE, internalBuffer.toString().trim());
+                response.setStatusCode(HttpConstants.OK_STATUS_CODE);
+                response.setStatusReason(HttpConstants.OK_STATUS_REASON);
+
+                response.setContent(internalBuffer.toString().trim());
                 response.getHeaders().put("Content-Type", HttpConstants.getMimeType(getExt(file.getName())));
+                response.getHeaders().put("Content-Length", String.valueOf(response.getContent().length()));
+
             } else {
-                response = new HttpResponseImpl(HttpConstants.NOT_FOUND_STATUS_CODE, "");
+                response.setStatusCode(HttpConstants.NOT_FOUND_STATUS_CODE);
+                response.setStatusReason(HttpConstants.NOT_FOUND_STATUS_REASON);
+                response.setContent("");
             }
         } catch (NullPointerException ex) {
             logger.error("[" + getClass().getSimpleName() + "] : {}", ex.toString());
         } finally {
+            session.sendResponse(response);
             return response;
         }
     }
 
     protected File getFile(String url) {
+        File root = new File(ROOT_PATH);
         File file = null;
         try {
             Preconditions.checkNotNull(url, "url is null");
             Preconditions.checkArgument(url.length() > 0, "url is empty");
-            file = new File(new URL(url).getPath());
+            url = (url.startsWith("/") ? url.substring(1) : url);
+            if (url == null || url.length() == 0) {
+                url = "index.html";
+            }
+            file = new File(root, url);
         } catch (NullPointerException ex) {
             logger.error("[" + getClass().getSimpleName() + "] : {}", ex.toString());
         } catch (IllegalArgumentException ex) {
             logger.error("[" + getClass().getSimpleName() + "] : {}", ex.toString());
-        }
-        finally {
+        } finally {
             return file;
         }
     }
