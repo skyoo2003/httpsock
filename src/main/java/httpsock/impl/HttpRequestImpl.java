@@ -36,7 +36,6 @@ public class HttpRequestImpl implements HttpRequest {
 
         if (requestParser.hasMoreTokens()) {
             String requestLine = requestParser.nextToken();
-            logger.info("[" + getClass().getSimpleName() + "] : requestLine\n{}", requestLine);
 
             String[] columns = requestLine.split(" ");
             if (columns == null || columns.length != 3) {
@@ -50,7 +49,6 @@ public class HttpRequestImpl implements HttpRequest {
 
         while (requestParser.hasMoreTokens()) {
             String line = requestParser.nextToken();
-            logger.info("[" + getClass().getSimpleName() + "] : header or message body\n{}", line);
 
             String[] columns = line.split(":");
             if (columns != null && columns.length == 2) { // Parse the header
